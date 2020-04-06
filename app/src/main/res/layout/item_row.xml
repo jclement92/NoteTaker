@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="5dp"
+    app:cardElevation="16dp">
+
+    <TextView
+        android:id="@+id/todo_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingVertical="20dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="96dp"
+        android:text="hello!"
+        android:textAlignment="textStart"
+        android:textAllCaps="false"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</androidx.cardview.widget.CardView>
