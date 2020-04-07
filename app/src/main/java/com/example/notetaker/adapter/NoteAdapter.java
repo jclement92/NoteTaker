@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     private static final String TAG = "Adapter";
-    private ArrayList<String> notes;
+    private static ArrayList<String> notes;
     private Context context;
     private String currentString;
 
@@ -86,7 +86,6 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
         Log.i(TAG, "Position: " + position);
 
         if(!item.isEmpty()) {
-
             if(position == -1) {
                 notes.add(0, item);
                 notifyItemInserted(0);
