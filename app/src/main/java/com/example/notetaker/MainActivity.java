@@ -93,19 +93,15 @@ public class MainActivity extends AppCompatActivity {
     private void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_first_fragment:
-                Toast.makeText(this, "First selected", Toast.LENGTH_SHORT).show();
-                break;
             case R.id.nav_second_fragment:
-                Toast.makeText(this, "Second selected", Toast.LENGTH_SHORT).show();
-                break;
             case R.id.nav_third_fragment:
-                Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
-                break;
+            case R.id.nav_fourth_fragment:
             default:
                 break;
         }
 
         menuItem.setChecked(true);
+        Toast.makeText(this, menuItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
         mDrawer.closeDrawers();
     }
 
