@@ -3,8 +3,10 @@ package com.example.notetaker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,9 +27,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
@@ -38,33 +37,41 @@ public class MainActivity extends AppCompatActivity {
 
     NoteAdapter adapter;
 
-    @Nullable String stringExtra;
+    @Nullable
+    String stringExtra;
 
-    @BindView(R.id.list_recycler_view) RecyclerView recyclerView;
-    @BindView(R.id.drawer_layout) DrawerLayout mDrawer;
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.add_fab) FloatingActionButton floatingActionButton;
-    @BindView(R.id.nvView) NavigationView navigationView;
+    RecyclerView recyclerView;
+    DrawerLayout mDrawer;
+    Toolbar toolbar;
+    FloatingActionButton floatingActionButton;
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
 
+        recyclerView = findViewById(R.id.list_recycler_view);
+        mDrawer = findViewById(R.id.drawer_layout);
+        toolbar = findViewById(R.id.toolbar);
+        floatingActionButton = findViewById(R.id.add_fab);
+        navigationView = findViewById(R.id.nvView);
+
+        toolbar.setBackgroundResource(R.color.colorPrimary);
         setSupportActionBar(toolbar);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawer, toolbar,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
 
+        toggle.setDrawerSlideAnimationEnabled(false);
         mDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
         setupDrawerContent(navigationView);
 
         adapter = new NoteAdapter(this);
-        adapter.readItems();
+        adapter.readFiles();
 
         recyclerView.hasFixedSize();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -81,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
+        View header = navigationView.getHeaderView(0);
+        LinearLayout sideNavLayout = header.findViewById(R.id.sideNavLayout);
+        sideNavLayout.setBackgroundResource(R.color.colorPrimary);
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -91,18 +102,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectDrawerItem(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.nav_first_fragment:
-            case R.id.nav_second_fragment:
-            case R.id.nav_third_fragment:
-            case R.id.nav_fourth_fragment:
-            default:
-                break;
-        }
-
         menuItem.setChecked(true);
         Toast.makeText(this, menuItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
         mDrawer.closeDrawers();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
@@ -120,24 +129,21 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "" + requestCode);
         Log.i(TAG, "" + resultCode);
 
-        if((resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && requestCode == REQUEST_CODE && data != null) {
+        if ((resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && requestCode == REQUEST_CODE && data != null) {
             stringExtra = data.getStringExtra(ITEM_TEXT);
-            int position = data.getIntExtra(ITEM_POSITION,-1);
+            int position = data.getIntExtra(ITEM_POSITION, -1);
 
-            Log.i(TAG,"Position: " + position);
-            if(stringExtra != null) {
+            Log.i(TAG, "Position: " + position);
+            if (stringExtra != null) {
                 Log.i(TAG, "String extra: " + stringExtra);
-                if(!stringExtra.equalsIgnoreCase("")) {
+                if (!stringExtra.equalsIgnoreCase("")) {
                     adapter.updateList(stringExtra, position);
 
-                    recyclerView.scrollToPosition(adapter.getItemCount()-1);
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 }
             } else {
                 Log.e(TAG, "No extra found.");
             }
-
-            // TODO #1: Handle empty output (Done)
-            // TODO #2: Handle Back button clicks
         }
     }
 

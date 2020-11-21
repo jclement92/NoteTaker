@@ -16,9 +16,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 import static com.example.notetaker.MainActivity.ITEM_POSITION;
 import static com.example.notetaker.MainActivity.ITEM_TEXT;
 
@@ -34,20 +31,23 @@ public class NoteActivity extends AppCompatActivity {
     boolean stopped = false;
     String updatedText;
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.editText) EditText editText;
-    @BindView(R.id.addText_fab) FloatingActionButton floatingActionButton;
+    Toolbar toolbar;
+    EditText editText;
+    FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
-        ButterKnife.bind(this);
+
+        toolbar = findViewById(R.id.toolbar);
+        editText = findViewById(R.id.editText);
+        floatingActionButton = findViewById(R.id.addText_fab);
 
         Log.i(TAG,"Created");
 
+        toolbar.setBackgroundResource(R.color.colorPrimary);
         setSupportActionBar(toolbar);
-
 
         editableText = getIntent().getStringExtra(ITEM_TEXT);
         updatedText = editableText;
@@ -64,7 +64,6 @@ public class NoteActivity extends AppCompatActivity {
             Objects.requireNonNull(getSupportActionBar()).setTitle("Edit Item");
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,9 +132,13 @@ public class NoteActivity extends AppCompatActivity {
         Log.i(TAG, "Current text: " + editableText);
 
         if(!Objects.equals(updatedText, editableText) && !backPressed) {
-            adapter.updateList(editableText, position);
-            saved = true;
-            Log.i(TAG, "Updated.");
+            if (editableText != null) {
+                adapter.updateList(editableText, position);
+                saved = true;
+                Log.i(TAG, "Updated.");
+            } else {
+                Log.i(TAG, "Error: Not updated.");
+            }
         }
     }
 
@@ -152,8 +155,9 @@ public class NoteActivity extends AppCompatActivity {
         Log.i(TAG,"Position: " + position);
 
         if((Objects.equals(Objects.requireNonNull(getSupportActionBar()).getTitle(), "Create Item")) && saved) {
-            position = adapter.getItemCount()-1;
+            position = 0;
             Log.i(TAG,"New position: " + position);
+            Log.i(TAG, "Note saved: " + NoteAdapter.notes.get(position));
         }
     }
 
