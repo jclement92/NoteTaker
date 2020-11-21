@@ -2,4 +2,14 @@
     <string name="app_name">NoteTaker</string>
     <string name="navigation_drawer_open" />
     <string name="navigation_drawer_close" />
+    <string name="add_a_note">Add a note</string>
+    <string name="save">Save</string>
+    <string name="add_hint">Add something:</string>
+    <string name="search_icon_text">Search</string>
+    <string name="more_options_icon_text">More options</string>
+    <string name="notes_side_menu_text">Notes</string>
+    <string name="trash_side_menu_text">Trash</string>
+    <string name="theme_side_menu_text">Theme</string>
+    <string name="settings_side_menu_text">Settings</string>
+    <string name="help_side_menu_text">Help</string>
 </resources>
