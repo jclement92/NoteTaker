@@ -10,22 +10,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.notetaker.adapter.NoteAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.util.*
 
 class NoteActivity : AppCompatActivity() {
-    val TAG = "AddActivity"
 
-    var position = 0
-    var editableText: String? = null
-    var adapter: NoteAdapter? = null
-    var saved = false
-    var backPressed = false
-    var stopped = false
-    var updatedText: String? = null
+    companion object { private const val TAG = "NoteActivity" }
 
-    var toolbar: Toolbar? = null
-    var editText: EditText? = null
-    var floatingActionButton: FloatingActionButton? = null
+    private var position = 0
+    private var saved = false
+    private var backPressed = false
+    private var stopped = false
+
+    private lateinit var editableText: String
+    private lateinit var adapter: NoteAdapter
+    private lateinit var updatedText: String
+    private lateinit var toolbar: Toolbar
+    private lateinit var editText: EditText
+    private lateinit var floatingActionButton: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,30 +37,34 @@ class NoteActivity : AppCompatActivity() {
 
         Log.i(TAG, "Created")
 
-        toolbar!!.setBackgroundResource(R.color.colorPrimary)
+        toolbar.setBackgroundResource(R.color.colorPrimary)
         setSupportActionBar(toolbar)
 
-        editableText = intent.getStringExtra("itemText")
+        if (intent.getStringExtra(MainActivity.ITEM_TEXT) == null) {
+            editableText = ""
+            supportActionBar!!.title = "Create Item"
+        } else {
+            editableText = intent.getStringExtra(MainActivity.ITEM_TEXT).toString()
+            supportActionBar!!.title = "Edit Item"
+        }
+
         updatedText = editableText
 
-        editText!!.setText(editableText)
-        editText!!.setSelection(editText!!.text.length)
+        editText.apply {
+            text = editableText
+            setSelection(editText.text.length)
+        }
 
-        position = intent.getIntExtra("itemPosition", -1)
+        position = intent.getIntExtra(MainActivity.ITEM_POSITION, -1)
         adapter = NoteAdapter(this)
 
-        if (editableText == null) {
-            Objects.requireNonNull(supportActionBar!!).title = "Create Item"
-        } else {
-            Objects.requireNonNull(supportActionBar!!).title = "Edit Item"
-        }
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        floatingActionButton!!.setOnClickListener(View.OnClickListener {
-            val text = editText!!.text.toString()
+        floatingActionButton.setOnClickListener(View.OnClickListener {
+            val text = editText.text.toString()
             Log.i(TAG, text)
             if (text.isEmpty()) return@OnClickListener
-            editText!!.setText("")
+            editText.setText("")
             goToMainActivity(text)
         })
     }
@@ -75,13 +79,13 @@ class NoteActivity : AppCompatActivity() {
     override fun onBackPressed() {
         backPressed = true
         if (stopped && updatedText != editableText) {
-            editableText = editText!!.text.toString()
-            goToMainActivity(editableText!!)
+            editableText = editText.text.toString()
+            goToMainActivity(editableText)
         } else {
             updatedText = editableText
-            editableText = editText!!.text.toString()
+            editableText = editText.text.toString()
             if (updatedText != editableText) {
-                goToMainActivity(editableText!!)
+                goToMainActivity(editableText)
             } else {
                 finish()
             }
@@ -102,18 +106,16 @@ class NoteActivity : AppCompatActivity() {
         super.onStop()
         stopped = true
         Log.i(TAG, "Stopped")
+
         updatedText = editableText
-        editableText = editText!!.text.toString()
+        editableText = editText.text.toString()
         Log.i(TAG, "Previous text: $updatedText")
         Log.i(TAG, "Current text: $editableText")
+
         if (updatedText != editableText && !backPressed) {
-            if (editableText != null) {
-                adapter!!.updateList(editableText!!, position)
-                saved = true
-                Log.i(TAG, "Updated.")
-            } else {
-                Log.i(TAG, "Error: Not updated.")
-            }
+            adapter.updateList(editableText, position)
+            saved = true
+            Log.i(TAG, "Updated.")
         }
     }
 
@@ -126,10 +128,10 @@ class NoteActivity : AppCompatActivity() {
         super.onResume()
         Log.i(TAG, "Resumed")
         Log.i(TAG, "Position: $position")
-        if (Objects.requireNonNull(supportActionBar!!).title == "Create Item" && saved) {
+        if (supportActionBar!!.title == "Create Item" && saved) {
             position = 0
             Log.i(TAG, "New position: $position")
-            Log.i(TAG, "Note saved: " + NoteAdapter.notes!![position])
+            Log.i(TAG, "Note saved: " + NoteAdapter.notes[position])
         }
     }
 
@@ -140,8 +142,8 @@ class NoteActivity : AppCompatActivity() {
 
     private fun goToMainActivity(text: String) {
         val intent = Intent()
-        intent.putExtra("itemText", text)
-        intent.putExtra("itemPosition", position)
+        intent.putExtra(MainActivity.ITEM_TEXT, text)
+        intent.putExtra(MainActivity.ITEM_POSITION, position)
         setResult(RESULT_OK, intent)
         finish()
     }

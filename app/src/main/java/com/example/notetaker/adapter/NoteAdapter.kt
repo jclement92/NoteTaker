@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.notetaker.MainActivity
 import com.example.notetaker.NoteActivity
 import com.example.notetaker.R
 import org.apache.commons.io.FileUtils
@@ -20,37 +21,39 @@ import java.nio.charset.Charset
 import java.util.*
 
 class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
-    private var currentString: String? = null
+    private lateinit var currentString: String
     private var pos = 0
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.todo_item)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val v = LayoutInflater.from(context).inflate(R.layout.item_row, parent, false)
-        return ViewHolder(v)
+        val view = LayoutInflater.from(context).inflate(R.layout.item_row, parent, false)
+        return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvName.text = notes!![position]
+        holder.tvName.text = notes[position]
+
         holder.tvName.setOnClickListener {
-            if (notes!!.size > 0) {
-                currentString = notes!![position]
+            if (notes.size > 0) {
+                currentString = notes[position]
                 val intent = Intent(context, NoteActivity::class.java)
-                intent.putExtra("itemText", currentString)
-                intent.putExtra("itemPosition", position)
-                (context as Activity).startActivityForResult(intent, 42)
+                intent.putExtra(MainActivity.ITEM_TEXT, currentString)
+                intent.putExtra(MainActivity.ITEM_POSITION, position)
+                (context as Activity).startActivityForResult(intent, MainActivity.REQUEST_CODE)
             }
         }
+
         holder.tvName.setOnLongClickListener {
             var isDeleted = false
             try {
-                Log.i(TAG, "File to delete: " + files!![files!!.size - 1 - position].canonicalFile)
-                isDeleted = files!![files!!.size - 1 - position].canonicalFile.delete()
+                Log.i(TAG, "File to delete: " + files[files.size - 1 - position].canonicalFile)
+                isDeleted = files[files.size - 1 - position].canonicalFile.delete()
                 if (isDeleted) {
-                    files!!.removeAt(files!!.size - 1 - position)
-                    notes!!.removeAt(position)
+                    files.removeAt(files.size - 1 - position)
+                    notes.removeAt(position)
                     notifyItemRemoved(position)
                     notifyItemRangeChanged(position, itemCount)
                     //writeItems();
@@ -68,7 +71,7 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
     }
 
     override fun getItemCount(): Int {
-        return notes!!.size
+        return notes.size
     }
 
     fun updateList(item: String, position: Int) {
@@ -77,15 +80,15 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
         pos = position
         if (item.isNotEmpty()) {
             if (position == -1) {
-                notes!!.add(0, item)
+                notes.add(0, item)
                 notifyItemInserted(0)
                 notifyItemRangeChanged(0, itemCount)
             } else {
-                notes!![position] = item
+                notes[position] = item
                 notifyItemChanged(position)
             }
             writeItems()
-            for (string in notes!!) {
+            for (string in notes) {
                 Log.i(TAG, string)
             }
             Log.i(TAG, "Saved")
@@ -103,8 +106,8 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
         //List<String> arrayList = new ArrayList<>();
         try {
             notes = ArrayList()
-            for (file in files!!) {
-                notes!!.add(0, FileUtils.readFileToString(file, Charset.defaultCharset()))
+            for (file in files) {
+                notes.add(0, FileUtils.readFileToString(file, Charset.defaultCharset()))
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -114,7 +117,7 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
 
     // Returns the file in which the data is stored
     private val dataFile: File
-        get() = File(context.filesDir, FilenameUtils.getName(files!![pos].toString()))
+        get() = File(context.filesDir, FilenameUtils.getName(files[pos].toString()))
 
     // read the items from the file system
     fun readItems() {
@@ -134,12 +137,12 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
         try {
             // save the item list as a line-delimited text file
             if (pos == -1) {
-                pos = notes!!.size - 1
-                val file = File(context.filesDir, "todo" + notes!!.size + ".txt")
-                files!!.add(file)
-                FileUtils.writeStringToFile(dataFile, notes!![0], Charset.defaultCharset())
+                pos = notes.size - 1
+                val file = File(context.filesDir, "todo" + notes.size + ".txt")
+                files.add(file)
+                FileUtils.writeStringToFile(dataFile, notes[0], Charset.defaultCharset())
             } else {
-                FileUtils.writeStringToFile(files!![notes!!.size - 1 - pos], notes!![pos], Charset.defaultCharset())
+                FileUtils.writeStringToFile(files[notes.size - 1 - pos], notes[pos], Charset.defaultCharset())
             }
         } catch (e: IOException) {
             // print the error to the console
@@ -149,7 +152,7 @@ class NoteAdapter(private val context: Context) : RecyclerView.Adapter<NoteAdapt
 
     companion object {
         private const val TAG = "NoteAdapter"
-        var notes: ArrayList<String>? = null
-        private var files: MutableList<File>? = null
+        lateinit var notes: ArrayList<String>
+        private lateinit var files: MutableList<File>
     }
 }
